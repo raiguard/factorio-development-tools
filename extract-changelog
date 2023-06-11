@@ -1,0 +1,11 @@
+#!/bin/sh
+
+ver=${1#v}
+if [ -d "src" ]; then
+    file="src/changelog.txt"
+else
+    file="changelog.txt"
+fi
+changelog=$(awk "/Version: $ver$/ { flag = 1 } /^--/ { flag = 0 } flag { gsub(/^  /, \"\"); print }" $file | tail -n +3)
+echo "$changelog"
+GIT_COMMITTER_DATE=$(git show --date raw $1 | awk '{ if ($1 == "Date:") { print substr($0, index($0,$2)) } }' | head -1) git tag $1 $1^{} -a -f -m "$changelog"
