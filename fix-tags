@@ -1,0 +1,12 @@
+#!/bin/sh
+
+eval set -- $(git tag | grep v1.3)
+
+while [ $# -gt 0 ]; do
+    changelog=$(git tag -l --format='%(contents)' $1)
+    log=$(git log --grep="Prepare to release version ${1#v}$" --date raw)
+    commit=$(echo $log | awk '{ print $2 }')
+    date=$(echo $log | awk '{ print $8, $9 }')
+    GIT_COMMITTER_DATE=$date git tag $1 $commit -a -f -m "$changelog"
+    shift
+done

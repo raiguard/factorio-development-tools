@@ -9,20 +9,20 @@ export CC="/usr/bin/gcc-12"
 export CXX="/usr/bin/g++-12"
 fbuild="fastbuild/linux/fbuild -config fastbuild/fbuild.bff"
 
-if [ "$1" = "compdb" ]; then
-  $fbuild GCC-Debugx64-factorio-run GCC-Debugx64-factorio-test -compdb
-  exit
-elif [ "$1" = "docs" ]; then
-  cd scripts/lua_doc
-  ./gen-docs.sh
-  cd ../..
-  exit
-fi
-
 mode="debug"
 type="run"
 if [ -n "$1" ]; then
   case $1 in
+    compdb)
+      $fbuild GCC-Debugx64-factorio-run GCC-Debugx64-factorio-test -compdb
+      exit
+      ;;
+    docs)
+      cd scripts/lua_doc
+      ./gen-docs.sh
+      cd ../..
+      exit
+      ;;
     test) type="test" ;;
     *) mode=$1 ;;
   esac
