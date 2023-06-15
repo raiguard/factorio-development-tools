@@ -112,7 +112,9 @@ if [ $fork ]; then
   forkargs="--config $write/config.ini"
 fi
 
-$basedir/bin/$mode$arch/$bin $forkargs $mpargs "$@"
+cmd="$basedir/bin/$mode$arch/$bin $forkargs $mpargs"
+echo $cmd
+$cmd "$@"
 
 if [ -n "$write" ]; then
   rm -rf $write
