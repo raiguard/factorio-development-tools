@@ -11,6 +11,10 @@ fbuild="fastbuild/linux/fbuild -config fastbuild/fbuild.bff"
 
 mode="debug"
 type="run"
+if [ "$1" = "test" ]; then
+  type="test"
+  shift
+fi
 if [ -n "$1" ]; then
   case $1 in
     compdb)
@@ -23,13 +27,9 @@ if [ -n "$1" ]; then
       cd ../..
       exit
       ;;
-    test) type="test" ;;
     *) mode=$1 ;;
   esac
-fi
-
-if [ -n "$2" ]; then
-  type="$2"
+  shift
 fi
 
 threads=$FACTORIO_COMPILE_THREADS
