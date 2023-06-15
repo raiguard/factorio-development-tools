@@ -112,7 +112,7 @@ if [ $fork ]; then
   forkargs="--config $write/config.ini"
 fi
 
-cmd="$basedir/bin/$mode$arch/$bin $forkargs $mpargs \"$@\""
+cmd="$basedir/bin/$mode$arch/$bin $forkargs $mpargs $@"
 echo "$cmd"
 $cmd
 
