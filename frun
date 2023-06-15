@@ -2,32 +2,48 @@
 
 set -e
 
-basedir="$FACTORIO"
+if [ "$1" = "bg" ]; then
+  shift
+  frun "$@" < /dev/null > /dev/null 2>&1 & disown
+  exit
+fi
+
+if [ -e "./server-settings.json" ]; then
+  basedir="$PWD"
+elif [ -n "$1" ] && [ -e "$FACTORIO/$1" ]; then
+  basedir="$FACTORIO/$1"
+  shift
+else
+  basedir="$FACTORIO_DEFAULT"
+fi
+
 mode="x64"
 bin="factorio"
-if [ -e "fastbuild/fbuild.bff" ]; then
-  # We are in a Factorio source directory
-  basedir="$PWD"
+if [ -e "$basedir/fastbuild/fbuild.bff" ]; then
   mode="Debugx64GCC"
   bin="factorio-run"
   if [ -n "$1" ]; then
-    modeinput=$1
-    case $1 in
-      --*) ;; # Ignore if it's a flag
-      docs) # Open Lua documentation
-        xdg-open $basedir/scripts/lua_doc/doc-files/index.html < /dev/null > /dev/null 2>&1 & disown
-        exit
-        ;;
-      testasan) mode="DebugASANx64GCC"; bin="factorio-test"; shift ;;
-      test) mode="Debugx64GCC"; bin="factorio-test"; shift ;;
-      *)
-        parsedmode=$(fd -i -I -t d \\b$1 bin | head -1 | awk -F / '{ print $2 }')
-        if [ -n "$parsedmode" ]; then
-          mode=$parsedmode
-          shift
-        fi
-        ;;
-    esac
+    if [ "$1" = "test" ]; then
+      bin="factorio-test"
+      shift
+    fi
+    if [ -n "$1" ]; then
+      modeinput=$1
+      case $1 in
+        --*) ;; # Ignore if it's a flag
+        docs) # Open Lua documentation
+          xdg-open $basedir/scripts/lua_doc/doc-files/index.html < /dev/null > /dev/null 2>&1 & disown
+          exit
+          ;;
+        *)
+          parsedmode=$(fd -i -I -t d \\b$1 "$basedir/bin" | head -1 | awk -F / '{ print $(NF-1) }')
+          if [ -n "$parsedmode" ]; then
+            mode=$parsedmode
+            shift
+          fi
+          ;;
+      esac
+    fi
   fi
 fi
 
