@@ -38,4 +38,6 @@ if [ -z "$threads" ]; then
   threads=$(($threads - 2))
 fi
 
-$fbuild -j$threads GCC-${mode}x64-factorio-${type}
+cmd="$fbuild -j$threads GCC-${mode}x64-factorio-${type}"
+echo "$cmd"
+$cmd
