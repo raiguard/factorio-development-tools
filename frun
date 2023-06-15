@@ -1,5 +1,29 @@
 #!/bin/sh
 
+help="\
+FRUN - Run an instance of Factorio.
+
+Synopsis:
+  frun [bg] [instance] [bin] [mode] [flags...] -- [factorio args...]
+
+Arguments:
+  bg                  If given, process is detached from the calling terminal.
+  bin                 If 'test', run 'factorio-test' (for Factorio dev only).
+  instance            If given, match against subdirectories in '\$FACTORIO' and select the match if it exists.
+  mode                Match against currently built modes and run the topmost match (for Factorio dev only).
+
+Flags:
+  -c                  Fork and connect to localhost:34197.
+  -f                  Create a temporary instance of the game for one-time use. Allows running multiple instances at once.
+  -h                  Show help text.
+  -l <locale>         Fork and set the game's locale.
+  -m <scenario>       Fork, start headless server and load the given scenario.
+  -s <save file>      Fork, start headless server and load the given save file.
+
+Environment:
+  \$FACTORIO          Base directory containing instances of the game. Only one instance is needed for each desired game version (see -f flag).
+  \$FACTORIO_DEFAULT  Default instance to run if no instance argument is given."
+
 set -e
 
 if [ "$1" = "bg" ]; then
@@ -22,39 +46,38 @@ bin="factorio"
 if [ -e "$basedir/fastbuild/fbuild.bff" ]; then
   mode="Debugx64GCC"
   bin="factorio-run"
+  if [ "$1" = "test" ]; then
+    bin="factorio-test"
+    shift
+  fi
   if [ -n "$1" ]; then
-    if [ "$1" = "test" ]; then
-      bin="factorio-test"
-      shift
-    fi
-    if [ -n "$1" ]; then
-      modeinput=$1
-      case $1 in
-        --*) ;; # Ignore if it's a flag
-        docs) # Open Lua documentation
-          xdg-open $basedir/scripts/lua_doc/doc-files/index.html < /dev/null > /dev/null 2>&1 & disown
-          exit
-          ;;
-        *)
-          parsedmode=$(fd -i -I -t d \\b$1 "$basedir/bin" | head -1 | awk -F / '{ print $(NF-1) }')
-          if [ -n "$parsedmode" ]; then
-            mode=$parsedmode
-            shift
-          fi
-          ;;
-      esac
-    fi
+    modeinput=$1
+    case $1 in
+      --*) ;; # Ignore if it's a flag
+      docs) # Open Lua documentation
+        xdg-open $basedir/scripts/lua_doc/doc-files/index.html < /dev/null > /dev/null 2>&1 & disown
+        exit
+        ;;
+      *)
+        parsedmode=$(fd -i -I -t d \\b$1 "$basedir/bin" | head -1 | awk -F / '{ print $(NF-1) }')
+        if [ -n "$parsedmode" ]; then
+          mode=$parsedmode
+          shift
+        fi
+        ;;
+    esac
   fi
 fi
 
-while getopts 'cfl:ms:' c
+while getopts 'cfhl:ms:' c
 do
   case $c in
     c) fork=true; mpargs="--mp-connect localhost:34197" ;;
     f) fork=true ;;
+    h) printf "%s\\n" "$help"; exit ;;
     l) fork=true; locale=$OPTARG ;;
-    m) fork=true; mpargs="--start-server-load-scenario" ;;
-    s) fork=true; mpargs="--start-server $OPTARG" ;;
+    m) fork=true; mpargs="--start-server-load-scenario '$OPTARG'" ;;
+    s) fork=true; mpargs="--start-server '$OPTARG'" ;;
   esac
 done
 shift $((OPTIND-1))
