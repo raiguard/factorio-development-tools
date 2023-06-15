@@ -4,25 +4,25 @@ help="\
 FRUN - Run an instance of Factorio.
 
 Synopsis:
-  frun [bg] [instance] [bin] [mode] [flags...] -- [factorio args...]
+  frun [bg] [version] [bin] [mode] [flags...] -- [factorio args...]
 
 Arguments:
   bg                  If given, process is detached from the calling terminal.
   bin                 If 'test', run 'factorio-test' (for Factorio dev only).
-  instance            If given, match against subdirectories in '\$FACTORIO' and select the match if it exists.
   mode                Match against currently built modes and run the topmost match (for Factorio dev only).
+  version             If given, match against subdirectories in '\$FACTORIO' and select the match if it exists.
 
 Flags:
   -c                  Fork and connect to localhost:34197.
-  -f                  Create a temporary instance of the game for one-time use. Allows running multiple instances at once.
+  -f                  Create a temporary instance of the game for one-time use. Allows running multiple instances of the same version at once.
   -h                  Show help text.
   -l <locale>         Fork and set the game's locale.
   -m <scenario>       Fork, start headless server and load the given scenario.
   -s <save file>      Fork, start headless server and load the given save file.
 
 Environment:
-  \$FACTORIO          Base directory containing instances of the game. Only one instance is needed for each desired game version (see -f flag).
-  \$FACTORIO_DEFAULT  Default instance to run if no instance argument is given."
+  \$FACTORIO          Base directory containing all desired versions of the game.
+  \$FACTORIO_DEFAULT  Default version to run if no version argument is given."
 
 set -e
 
