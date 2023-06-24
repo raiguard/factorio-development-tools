@@ -5,6 +5,8 @@ if [ ! -e "fastbuild/linux/fbuild" ]; then
   exit
 fi
 
+export CC="/usr/bin/gcc-12"
+export CXX="/usr/bin/g++-12"
 fbuild="fastbuild/linux/fbuild -config fastbuild/fbuild.bff"
 
 mode="Debugx64"
