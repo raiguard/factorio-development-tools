@@ -50,3 +50,9 @@ fi
 cmd="$fbuild -j$threads $@ GCC-${mode}-factorio-${type}"
 echo "$cmd"
 $cmd
+
+if [ $? -eq 0 ]; then
+  notify-send -h string:x-dunst-stack-tag:compilation -c system "Compilation finished"
+else
+  notify-send -u critical -h string:x-dunst-stack-tag:compilation -c system "Compilation failed"
+fi
