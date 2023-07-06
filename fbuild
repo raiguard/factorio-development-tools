@@ -52,7 +52,7 @@ echo "$cmd"
 $cmd
 
 if [ $? -eq 0 ]; then
-  notify-send -h string:x-dunst-stack-tag:compilation -c system "Compilation finished"
+  notify-send -h string:x-dunst-stack-tag:compilation -c compilation "Compilation finished"
 else
-  notify-send -u critical -h string:x-dunst-stack-tag:compilation -c system "Compilation failed"
+  notify-send -u critical -h string:x-dunst-stack-tag:compilation -c compilation "Compilation failed"
 fi
