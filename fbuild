@@ -23,7 +23,7 @@ if [ -n "$1" ]; then
       ;;
     docs)
       cd scripts/lua_doc
-      ./gen-docs.py
+      ./gen-docs.sh
       cd ../..
       exit
       ;;
