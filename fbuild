@@ -2,12 +2,28 @@
 
 if [ ! -e "fastbuild/linux/fbuild" ]; then
   echo "Not in a Factorio source directory"
-  exit
+  exit 1
 fi
 
-export CC="/usr/bin/gcc-12"
-export CXX="/usr/bin/g++-12"
 fbuild="fastbuild/linux/fbuild -config fastbuild/fbuild.bff"
+
+compiler=${FACTORIO_COMPILER-gcc}
+
+export CC=""
+export CXX=""
+case "$compiler" in
+  GCC)
+    CC=$(whereis -b gcc | awk '{ print $2 }')
+    CXX=$(whereis -b g++ | awk '{ print $2 }')
+    ;;
+  Clang)
+    CC=$(whereis -b clang | awk '{ print $2 }')
+    CXX=$(whereis -b clang++ | awk '{ print $2 }')
+    ;;
+  *)
+    echo "Unknown compiler $compiler, expected 'GCC' or 'Clang'"
+    exit 1
+esac
 
 mode="Debugx64"
 type="run"
@@ -18,7 +34,7 @@ fi
 if [ -n "$1" ]; then
   case $1 in
     compdb)
-      $fbuild GCC-Debugx64-factorio-run GCC-Debugx64-factorio-test -compdb
+      $fbuild $compiler-Debugx64-factorio-run $compiler-Debugx64-factorio-test -compdb
       exit
       ;;
     docs)
@@ -47,7 +63,7 @@ if [ -z "$threads" ]; then
   threads=$(($threads - 2))
 fi
 
-cmd="$fbuild -j$threads $@ GCC-${mode}-factorio-${type}"
+cmd="$fbuild -j$threads $@ $compiler-$mode-factorio-$type"
 echo "$cmd"
 $cmd
 

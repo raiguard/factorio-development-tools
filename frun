@@ -44,7 +44,8 @@ fi
 target="x64"
 bin="factorio"
 if [ -e "$basedir/fastbuild/fbuild.bff" ]; then
-  target="Debugx64GCC"
+  compiler="${FACTORIO_COMPILER-GCC}"
+  target="Debugx64$compiler"
   bin="factorio-run"
   if [ "$1" = "test" ]; then
     bin="factorio-test"
@@ -58,7 +59,7 @@ if [ -e "$basedir/fastbuild/fbuild.bff" ]; then
         exit
         ;;
       *)
-        parsedtarget=$(fd -i -I -t d \\b${1}x64GCC "$basedir/bin" | head -1 | awk -F / '{ print $(NF-1) }')
+        parsedtarget=$(fd -i -I -t d \\b${1}x64$compiler "$basedir/bin" | head -1 | awk -F / '{ print $(NF-1) }')
         if [ -n "$parsedtarget" ]; then
           target=$parsedtarget
           shift
