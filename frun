@@ -76,8 +76,8 @@ do
     f) fork=true ;;
     h) printf "%s\\n" "$help"; exit ;;
     l) fork=true; locale=$OPTARG ;;
-    m) fork=true; mpargs="--start-server-load-scenario '$OPTARG'" ;;
-    s) fork=true; mpargs="--start-server '$OPTARG'" ;;
+    m) fork=true; mpargs="--start-server-load-scenario $OPTARG" ;;
+    s) fork=true; mpargs="--start-server $OPTARG" ;;
   esac
 done
 shift $((OPTIND-1))

@@ -38,8 +38,9 @@ if [ -n "$1" ]; then
       exit
       ;;
     docs)
+      shift
       cd scripts/lua_doc
-      ./gen-docs.sh
+      ./gen-docs.sh "$@"
       cd ../..
       exit
       ;;
