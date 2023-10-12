@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -e
+
+help="\
+INSTALL-FMTK - Install or upgrade standalone FMTK executable.
+
+Synopsis:
+  install-fmtk [-h] [-o path]
+
+Flags:
+  -h                  Show help text.
+  -o path   Place binary at the given path. Defaults to '\$HOME/bin/fmtk'."
+
+output_path="$HOME/bin/fmtk"
+while getopts 'ho:' c
+do
+  case $c in
+    h) printf "%s\\n" "$help"; exit ;;
+    o) output_path=$OPTARG ;;
+  esac
+done
+shift $((OPTIND-1))
+
+download_url=$(curl https://registry.npmjs.org/factoriomod-debug/latest | jq -r '.dist.tarball')
+dir=$(mktemp -d /tmp/upgrade-fmtk.XXX)
+wget -O "$dir/package.tgz" "$download_url"
+tar -zxf "$dir/package.tgz" -C "$dir"
+cp "$dir/package/dist/fmtk.js" "$output_path"
+rm -rf "$dir"
+chmod +x "$output_path"
+echo "Upgrade complete, you should see FMTK help below."
+"$output_path" help
