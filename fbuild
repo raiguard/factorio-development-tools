@@ -27,14 +27,14 @@ esac
 
 mode="Debugx64"
 type="run"
-if [ "$1" = "test" ]; then
-  type="test"
+if [ "$1" = "test" ] || [ "$1" = "without-common-hpp" ]; then
+  type="$1"
   shift
 fi
 if [ -n "$1" ]; then
   case $1 in
     compdb)
-      $fbuild $compiler-Debugx64-factorio-run $compiler-Debugx64-factorio-test -compdb
+      $fbuild $compiler-Debugx64-factorio-without-common-hpp -compdb
       exit
       ;;
     docs)
