@@ -11,6 +11,7 @@ compiler=${FACTORIO_COMPILER-gcc}
 
 export CC=""
 export CXX=""
+export AR=""
 case "$compiler" in
   GCC)
     CC=$(whereis -b gcc | awk '{ print $2 }')
@@ -19,6 +20,7 @@ case "$compiler" in
   Clang)
     CC=$(whereis -b clang | awk '{ print $2 }')
     CXX=$(whereis -b clang++ | awk '{ print $2 }')
+    AR=$(whereis -b llvm-ar | awk '{ print $2 }')
     ;;
   *)
     echo "Unknown compiler $compiler, expected 'GCC' or 'Clang'"
@@ -62,6 +64,10 @@ threads=$FACTORIO_COMPILE_THREADS
 if [ -z "$threads" ]; then
   threads=$(grep -c vendor_id /proc/cpuinfo)
   threads=$(($threads - 2))
+fi
+
+if [ "$1" = "--" ]; then
+  shift
 fi
 
 cmd="$fbuild -j$threads $@ $compiler-$mode-factorio-$type"
