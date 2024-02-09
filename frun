@@ -19,6 +19,7 @@ Flags:
   -l <locale>         Fork and set the game's locale.
   -m <scenario>       Fork, start headless server and load the given scenario.
   -s <save file>      Fork, start headless server and load the given save file.
+  -v <driver>         Use the specified video driver.
 
 Environment:
   \$FACTORIO          Base directory containing all desired versions of the game.
@@ -69,7 +70,7 @@ if [ -e "$basedir/fastbuild/fbuild.bff" ]; then
   fi
 fi
 
-while getopts 'cfhl:ms:' c
+while getopts 'cfhl:ms:v:' c
 do
   case $c in
     c) fork=true; mpargs="--mp-connect localhost:34197" ;;
@@ -78,6 +79,7 @@ do
     l) fork=true; locale=$OPTARG ;;
     m) fork=true; mpargs="--start-server-load-scenario $OPTARG" ;;
     s) fork=true; mpargs="--start-server $OPTARG" ;;
+    v) videodriver=$OPTARG ;;
   esac
 done
 shift $((OPTIND-1))
@@ -114,7 +116,11 @@ fi
 
 cmd="$basedir/bin/$target$arch/$bin $forkargs $mpargs $@"
 echo "$cmd"
-$cmd
+if [ -n "$videodriver" ]; then
+  SDL_VIDEODRIVER="$videodriver" $cmd
+else
+  $cmd
+fi
 
 if [ -n "$write" ]; then
   rm -rf $write
