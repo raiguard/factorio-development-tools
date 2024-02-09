@@ -10,9 +10,9 @@ Synopsis:
 
 Flags:
   -h        Show help text.
-  -o path   Place binary at the given path. Defaults to '\$HOME/bin/fmtk'."
+  -o path   Place binary at the given path. Defaults to '\$HOME/.local/bin/fmtk'."
 
-output_path="$HOME/bin/fmtk"
+output_path="$HOME/.local/bin/fmtk"
 while getopts 'ho:' c
 do
   case $c in
