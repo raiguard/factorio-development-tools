@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 eval set -- $(git tag | grep v1.3)
 

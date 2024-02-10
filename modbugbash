@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # modbugbash copies the given save into the Factorio saves folder, syncs mods
 # and startup settings with fmm, then launches the game and loads that save

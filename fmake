@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 if [ ! -e "fastbuild/linux/fbuild" ]; then
   echo "Not in a Factorio source directory"

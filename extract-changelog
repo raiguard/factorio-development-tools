@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 ver=${1#v}
 if [ -d "src" ]; then

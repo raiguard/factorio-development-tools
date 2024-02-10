@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # factorio-mp-test spins up a Factorio server, then a configurable number of
 # clients, in a debug world.
