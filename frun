@@ -4,13 +4,12 @@ help="\
 FRUN - Run an instance of Factorio.
 
 Synopsis:
-  frun [bg] [version] [bin] [target] [flags...] -- [factorio args...]
+  frun [bin] [target] [flags...] -- [factorio args...]
 
 Arguments:
   bg                  If given, process is detached from the calling terminal.
   bin                 If 'test', run 'factorio-test' binary. For Factorio dev only.
   target              If given, match against currently built modes and run the topmost match. If 'docs', open documentation. For Factorio dev only.
-  version             If given, match against subdirectories in '\$FACTORIO' and select the match if it exists.
 
 Flags:
   -c                  Fork and connect to localhost:34197.
@@ -22,8 +21,7 @@ Flags:
   -v <driver>         Use the specified video driver.
 
 Environment:
-  \$FACTORIO          Base directory containing all desired versions of the game.
-  \$FACTORIO_DEFAULT  Default version to run if no version argument is given."
+  \$FACTORIO_PATH     If PWD is not a Factorio installation, fall back to this path."
 
 set -e
 
@@ -33,13 +31,10 @@ if [ "$1" = "bg" ]; then
   exit
 fi
 
-if [ -e "./server-settings.json" ]; then
+if [ -e "config-path.cfg" ]; then
   basedir="$PWD"
-elif [ -n "$1" ] && [ -e "$FACTORIO/$1" ]; then
-  basedir="$FACTORIO/$1"
-  shift
 else
-  basedir="$FACTORIO_DEFAULT"
+  basedir="$FACTORIO_PATH"
 fi
 
 target="x64"
