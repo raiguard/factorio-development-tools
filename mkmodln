@@ -17,7 +17,7 @@ if [ -z "$modname" ]; then
     exit
 fi
 
-destination=$FACTORIO_DEFAULT/mods/$modname
+destination=$FACTORIO_PATH/mods/$modname
 
 if [ -L "$destination" ]; then
     if [ "$1" == "--force" ]; then
