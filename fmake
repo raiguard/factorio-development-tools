@@ -16,6 +16,7 @@ case "$compiler" in
   GCC)
     CC=$(whereis -b gcc | awk '{ print $2 }')
     CXX=$(whereis -b g++ | awk '{ print $2 }')
+    AR=$(whereis -b ar | awk '{ print $2 }')
     ;;
   Clang)
     CC=$(whereis -b clang | awk '{ print $2 }')
@@ -29,7 +30,7 @@ esac
 
 mode="Debugx64"
 type="run"
-if [ "$1" = "test" ] || [ "$1" = "without-common-hpp" ]; then
+if [ "$1" = "test" ] || [ "$1" = "without-common-hpp" ] || [ "$1" = "all-in-one" ]; then
   type="$1"
   shift
 fi
