@@ -37,7 +37,7 @@ fi
 if [ -n "$1" ]; then
   case $1 in
     compdb)
-      $fbuild $compiler-Debugx64-factorio-without-common-hpp $compiler-Debugx64-factorio-test -compdb
+      $fbuild $compiler-SteamDebugx64-factorio-without-common-hpp $compiler-Debugx64-factorio-test -compdb
       exit
       ;;
     docs)
