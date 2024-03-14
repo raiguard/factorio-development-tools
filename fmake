@@ -1,4 +1,28 @@
 #!/usr/bin/env sh
+# vim: ft=sh
+
+help="\
+FMAKE - Factorio FASTBuild wrapper.
+
+Synopsis:
+  fmake [flags...] (compdb|docs) -- [fastbuild args...]
+
+Arguments:
+  compdb              Generate Clang compilation database.
+  docs                Build documentation.
+
+Flags:
+  -a <arch>           Use the given architecture. [x64, arm64]
+  -c <compiler>       Use the given compiler. [GCC, Clang, MSVC]
+  -h                  Show help text.
+  -m <mode>           Build mode. [Debug, FastDebug, Release, FinalRelease, etc...]
+  -t <target>         Specify target. [factorio-run, factorio-test, factorio-all-in-one, etc...]
+
+Environment:
+  \$FACTORIO_COMPILER
+      Specify default compiler. Can be overridden with the -c flag.
+  \$FACTORIO_COMPILE_THREADS
+      The default number of threads to use for compilation."
 
 if [ ! -e "fastbuild/linux/fbuild" ]; then
   echo "Not in a Factorio source directory"
@@ -7,33 +31,29 @@ fi
 
 fbuild="fastbuild/linux/fbuild -config fastbuild/fbuild.bff"
 
-compiler=${FACTORIO_COMPILER-gcc}
+arch="x64"
+compiler=${FACTORIO_COMPILER-GCC}
+mode="Debug"
+target="factorio-run"
 
-export CC=""
-export CXX=""
-export AR=""
-case "$compiler" in
-  GCC)
-    CC=$(whereis -b gcc | awk '{ print $2 }')
-    CXX=$(whereis -b g++ | awk '{ print $2 }')
-    AR=$(whereis -b ar | awk '{ print $2 }')
-    ;;
-  Clang)
-    CC=$(whereis -b clang | awk '{ print $2 }')
-    CXX=$(whereis -b clang++ | awk '{ print $2 }')
-    AR=$(whereis -b llvm-ar | awk '{ print $2 }')
-    ;;
-  *)
-    echo "Unknown compiler $compiler, expected 'GCC' or 'Clang'"
-    exit 1
-esac
+while getopts 'a:c:hm:t:' c
+do
+  case $c in
+    a) arch="$OPTARG" ;;
+    c) compiler="$OPTARG" ;;
+    h) printf "%s\\n" "$help"; exit ;;
+    m) mode="$OPTARG" ;;
+    t) target="$OPTARG"
+  esac
+done
+shift $((OPTIND-1))
 
-mode="Debugx64"
-type="run"
-if [ "$1" = "test" ] || [ "$1" = "without-common-hpp" ] || [ "$1" = "all-in-one" ]; then
-  type="$1"
-  shift
+if [ "$compiler" = "Clang" ]; then
+  export CC=$(whereis -b clang | awk '{ print $2 }')
+  export CXX=$(whereis -b clang++ | awk '{ print $2 }')
+  export AR=$(whereis -b llvm-ar | awk '{ print $2 }')
 fi
+
 if [ -n "$1" ]; then
   case $1 in
     compdb)
@@ -46,17 +66,6 @@ if [ -n "$1" ]; then
       ./gen-docs.sh "$@"
       cd ../..
       exit
-      ;;
-    showtargets)
-      $fbuild -showtargets
-      exit
-      ;;
-    *)
-      parsedmode=$($fbuild -showtargets | grep -i "\b$1" | head -1 | awk -F - '{ print $2 }')
-      if [ -n "$parsedmode" ]; then
-        mode=$parsedmode
-        shift
-      fi
       ;;
   esac
 fi
@@ -71,7 +80,7 @@ if [ "$1" = "--" ]; then
   shift
 fi
 
-cmd="$fbuild -j$threads $@ $compiler-$mode-factorio-$type"
+cmd="$fbuild -j$threads $@ $compiler-$mode$arch-$target"
 echo "$cmd"
 $cmd
 

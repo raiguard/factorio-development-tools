@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# vim: ft=sh
 
 help="\
 FRUN - Run an instance of Factorio.
