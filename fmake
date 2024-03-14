@@ -33,15 +33,17 @@ fbuild="fastbuild/linux/fbuild -config fastbuild/fbuild.bff"
 
 arch="x64"
 compiler=${FACTORIO_COMPILER-GCC}
+headless=""
 mode="Debug"
 target="factorio-run"
 
-while getopts 'a:c:hm:t:' c
+while getopts 'a:c:hHm:t:' c
 do
   case $c in
     a) arch="$OPTARG" ;;
     c) compiler="$OPTARG" ;;
     h) printf "%s\\n" "$help"; exit ;;
+    H) headless="headless-" ;;
     m) mode="$OPTARG" ;;
     t) target="$OPTARG"
   esac
@@ -80,7 +82,7 @@ if [ "$1" = "--" ]; then
   shift
 fi
 
-cmd="$fbuild -j$threads $@ $compiler-$mode$arch-$target"
+cmd="$fbuild -j$threads $@ $compiler-$headless$mode$arch-$target"
 echo "$cmd"
 $cmd
 
