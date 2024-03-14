@@ -15,6 +15,7 @@ Flags:
   -a <arch>           Use the given architecture. [x64, arm64]
   -c <compiler>       Use the given compiler. [GCC, Clang, MSVC]
   -h                  Show help text.
+  -H                  Headless build.
   -m <mode>           Build mode. [Debug, FastDebug, Release, FinalRelease, etc...]
   -t <target>         Specify target. [factorio-run, factorio-test, factorio-all-in-one, etc...]
 
