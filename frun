@@ -5,32 +5,33 @@ help="\
 FRUN - Run an instance of Factorio.
 
 Synopsis:
-  frun [bin] [target] [flags...] -- [factorio args...]
-
-Arguments:
-  bg                  If given, process is detached from the calling terminal.
-  bin                 If 'test', run 'factorio-test' binary. For Factorio dev only.
-  target              If given, match against currently built modes and run the topmost match. If 'docs', open documentation. For Factorio dev only.
+  frun [flags...] -- [factorio args...]
 
 Flags:
-  -c                  Fork and connect to localhost:34197.
-  -f                  Create a temporary instance of the game for one-time use. Allows running multiple instances of the same version at once.
-  -h                  Show help text.
-  -l <locale>         Fork and set the game's locale.
-  -m <scenario>       Fork, start headless server and load the given scenario.
-  -s <save file>      Fork, start headless server and load the given save file.
-  -v <driver>         Use the specified video driver.
+  -C                   Fork and connect to localhost:34197.
+  -d                   Detach from the calling terminal.
+  -f                   Create a temporary instance of the game for one-time use. Allows running multiple instances of the same version at once.
+  -h                   Show help text.
+  -l <locale>          Fork and set the game's locale.
+  -s <save file>       Fork, start headless server and load the given save file.
+  -S <scenario>        Fork, start headless server and load the given scenario.
+  -a <driver>          Use the specified audio driver.
+  -v <driver>          Use the specified video driver.
+
+Developer Flags:
+  -a <arch>            Specify architecture. Defaults to x64. (x64, arm64)
+  -c <compiler>        Specify compiler. Defaults to GCC. (Clang, GCC)
+  -D                   Open Lua documentation instead of running the game.
+  -m <mode>            Specify release mode. Defaults to Debug. (Debug, FastDebug, Release, SteamDebug, etc...)
+  -t <target>          Specify target. Defaults to factorio-run. (factorio, factorio-run, factorio-test, etc...)
 
 Environment:
-  \$FACTORIO_PATH     If PWD is not a Factorio installation, fall back to this path."
+  \$FACTORIO_COMPILER
+      Specify default compiler. Can be overridden with the -c flag.
+  \$FACTORIO_PATH
+      If PWD is not a Factorio installation, fall back to this path."
 
 set -e
-
-if [ "$1" = "bg" ]; then
-  shift
-  frun "$@" < /dev/null > /dev/null 2>&1 & disown
-  exit
-fi
 
 if [ -e "config-path.cfg" ]; then
   basedir="$PWD"
@@ -38,47 +39,67 @@ else
   basedir="$FACTORIO_PATH"
 fi
 
-target="x64"
-bin="factorio"
 if [ -e "$basedir/fastbuild/fbuild.bff" ]; then
-  compiler="${FACTORIO_COMPILER-GCC}"
-  target="Debugx64$compiler"
-  bin="factorio-run"
-  if [ "$1" = "test" ]; then
-    bin="factorio-test"
-    shift
-  fi
-  if [ -n "$1" ]; then
-    case $1 in
-      --*) ;; # Ignore if it's a flag
-      docs) # Open Lua documentation
-        xdg-open $basedir/scripts/lua_doc/doc-files/index.html < /dev/null > /dev/null 2>&1 & disown
-        exit
-        ;;
-      *)
-        parsedtarget=$(fd -i -I -t d \\b${1}x64$compiler "$basedir/bin" | head -1 | awk -F / '{ print $(NF-1) }')
-        if [ -n "$parsedtarget" ]; then
-          target=$parsedtarget
-          shift
-        fi
-        ;;
-    esac
-  fi
+  developer=true
 fi
 
-while getopts 'cfhl:ms:v:' c
+check_developer() {
+  if [ "$developer" != true ]; then
+    echo "Unable to use developer flags, not in a Factorio development directory."
+    exit
+  fi
+}
+
+arch="x64"
+compiler=${FACTORIO_COMPILER-GCC}
+mode="Debug"
+target="factorio-run"
+
+while getopts 'Cfhl:s:S:v:a:c:DHm:t:' c
 do
   case $c in
-    c) fork=true; mpargs="--mp-connect localhost:34197" ;;
+    C) fork=true; mpargs="--mp-connect localhost:34197" ;;
+    d)
+      if [ -z "$FRUN_IS_DETATCHED"]; then
+        FRUN_IS_DETATCHED=true frun "$@" < /dev/null > /dev/null 2>&1 & disown
+        exit
+      fi
+      ;;
     f) fork=true ;;
     h) printf "%s\\n" "$help"; exit ;;
-    l) fork=true; locale=$OPTARG ;;
-    m) fork=true; mpargs="--start-server-load-scenario $OPTARG" ;;
+    l) fork=true; locale="$OPTARG" ;;
     s) fork=true; mpargs="--start-server $OPTARG" ;;
-    v) videodriver=$OPTARG ;;
+    S) fork=true; mpargs="--start-server-load-scenario $OPTARG" ;;
+    a) export SDL_AUDIODRIVER="$OPTARG" ;;
+    v) export SDL_VIDEODRIVER="$OPTARG" ;;
+    # Developer
+    a) check_developer; arch="$OPTARG" ;;
+    c) check_developer; compiler="$OPTARG" ;;
+    D)
+      xdg-open $basedir/scripts/lua_doc/doc-files/index.html < /dev/null > /dev/null 2>&1 & disown
+      exit
+      ;;
+    H) check_developer; headless=true; ;;
+    m) check_developer; mode="$OPTARG" ;;
+    t) check_developer; target="$OPTARG" ;;
   esac
 done
 shift $((OPTIND-1))
+
+if [ $developer ]; then
+  spec="$mode$arch$compiler"
+  if [ $headless ]; then
+    spec="$spec-headless"
+  fi
+  spec="$spec/$target"
+  bin="$basedir/bin/$spec"
+  if [ -z "$bin" ]; then
+    echo "Could not find $spec"
+    exit
+  fi
+else
+  bin=$(find "$basedir/bin" -type f | head -1)
+fi
 
 # Allow running multiple instances at once
 if [ $fork ]; then
@@ -110,14 +131,10 @@ if [ $fork ]; then
   forkargs="--config $write/config.ini"
 fi
 
-cmd="$basedir/bin/$target$arch/$bin $forkargs $mpargs $@"
+cmd="$bin $forkargs $mpargs $@"
 echo "$cmd"
-if [ -n "$videodriver" ]; then
-  SDL_VIDEODRIVER="$videodriver" $cmd
-else
-  $cmd
-fi
+$cmd
 
 if [ -n "$write" ]; then
-  rm -rf $write
+  rm -rf "$write"
 fi
