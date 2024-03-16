@@ -19,7 +19,7 @@ Flags:
   -v <driver>          Use the specified video driver.
 
 Developer Flags:
-  -a <arch>            Specify architecture. Defaults to x64. (x64, arm64)
+  -A <arch>            Specify architecture. Defaults to x64. (x64, arm64)
   -c <compiler>        Specify compiler. Defaults to GCC. (Clang, GCC)
   -D                   Open Lua documentation instead of running the game.
   -m <mode>            Specify release mode. Defaults to Debug. (Debug, FastDebug, Release, SteamDebug, etc...)
@@ -55,7 +55,7 @@ compiler=${FACTORIO_COMPILER-GCC}
 mode="Debug"
 target="factorio-run"
 
-while getopts 'Cfhl:s:S:v:a:c:DHm:t:' c
+while getopts 'Cdfhl:s:S:a:v:c:DHm:t:' c
 do
   case $c in
     C) fork=true; mpargs="--mp-connect localhost:34197" ;;
@@ -73,7 +73,7 @@ do
     a) export SDL_AUDIODRIVER="$OPTARG" ;;
     v) export SDL_VIDEODRIVER="$OPTARG" ;;
     # Developer
-    a) check_developer; arch="$OPTARG" ;;
+    A) check_developer; arch="$OPTARG" ;;
     c) check_developer; compiler="$OPTARG" ;;
     D)
       xdg-open $basedir/scripts/lua_doc/doc-files/index.html < /dev/null > /dev/null 2>&1 & disown
